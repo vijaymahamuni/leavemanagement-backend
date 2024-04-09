@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="htmlTemplate">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      /* Basic styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        background-color: #f7f7f7;
+      }
+      
+      .htmlTemplate {
+        padding: 2em;
+        position: relative;
+      }
+      
+      /* Header styles */
+      .header {
+        color: #fff;
+        background-color:#d2e3b1;
+        text-align: center;
+        height: auto;
+      }
+      
+      /* Content styles */
+      .content {
+        padding: 0px;
+        background-color: #fff;
+      }
+      
+      .media {
+        width: 100%;
+        font-family: monospace;
+        font-size: 12px;
+        text-align: center;
+        color: #b2b2b2;
+        padding: 1em;
+        background-color: rgb(68, 82, 95);
+      }
+      
+      .headingLead {
+        font-weight: bold;
+        text-align: center;
+        position: relative;
+        top: 1em;
+        left: 1em;
+      }
+      
+      .textleave {
+        text-align: center;
+      }
+      
+      .Regardstxt {
+        text-align: left;
+      }
+      
+      .accesslevel {
+        text-align: center;
+        padding: 1em;
+        font-weight: bold;
+        font-size: 15px;
+        color: #636363;
+        margin-top: -1.5em;
+        margin-left: -1em;
+      }
+      
+      .contentreq {
+        background-color: #829fcb;
+        font-weight: bold;
+        padding: 1em 1.5em 3em 3em;
+        position: relative;
+        top: 3em;
+        border-radius: 10px;
+        left: 1em;
+        text-align: left;
+      }
+      
+      .content-text {
+       
+        border-radius: 5px;
+        background-color: #f57777;
+        padding: 1em;
+        font-size: 18px;
+        margin-top: -1em;
+        width: 100%;
+   
+
+      
+      }
+      
+      .user_details {
+        background-color: white;
+      }
+      .regards{
+        margin-top: 15px;
+
+      }
+      
+      .detailsleave {
+        padding: 2em;
+      }
+      
+      .notification {
+       
+    height: 97px;
+    background: #88ceb2;
+    text-align: center;
+    margin-bottom: -9px;
+    border-radius: 5px;
+    padding: 2em;
+    width: 84%;
+    padding-top: 27px;
+    font-size: 20px;
+    font-family: monospace;
+    font-weight: bold;
+    margin-left: 88px;
+    margin-top: 7px;
+
+      }
+      
+      .buttonlink {
+        margin-bottom: 0px;
+        background: #829fcb;
+        width: 240px;
+        border: 15px solid #829fcb;
+        font-family: monospace;
+        font-size: 14px;
+        line-height: 106%;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        border-radius: 25px;
+        font-weight: bold;
+        margin-left: 38%;
+        margin-top: 28px;
+      }
+      
+      .tigmalogo {
+        margin-top: 7px;
+        width: 218px;
+      }
+      .Arrange_Details{
+        margin-left: 33%;
+      }
+      .container-Leavereq {
+        padding: 4em 7em 4em 0;
+        background-color: white;
+      }
+      .centerfirst{
+        margin-left: 122px;
+      }
+      .centerlast{
+        margin-left: 84px;
+
+      }
+      
+      .p2_styl {
+        position: absolute;
+        left: 16%;
+      }
+      .centerEmployee{
+        margin-left: 9px;
+    
+    }  
+    .centerleatype{
+      margin-left: 127px;
+    }
+    .centerMessage{
+      margin-left: 73px;
+    }
+      .p3_styl {
+        position: absolute;
+        left: 20%;
+      }
+      
+      .heading {
+        font-weight: bold;
+      }
+      
+      .picture {
+        /* Add any necessary styles */
+      }
+      
+      /* Footer styles */
+      .footer {
+        background-color: black;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      
+      /* Responsive styles */
+      @media screen and (max-width: 600px) {
+        .htmlTemplate {
+          padding: 1em;
+        }
+        
+        .header, .footer {
+          padding: 1em;
+        }
+        
+        .contentreq {
+          padding: 1em;
+        }
+        
+        /* Add any other necessary responsive styles */
+      }
+    </style>
+  </head>
+  
+  <body>
+    <div class="header">
+      <img src="https://www.tigmatech.com/assets/img/sticky-logo.png" class="tigmalogo" />
+    </div>
+    
+    <div class="user_details">
+      <div class="detailsleave">
+        <div class="notification">
+          <h3>Ticket Raising Notification</h3>
+        </div>
+        
+        <div class="accesslevel">
+          
+        </div>
+        
+        <div class="content-text">
+          <p class="textleave">The Following Employee Ticket Rise Request Please Take On it:</p>
+           
+          <div class="Arrange_Details">
+            <ul style="
+            list-style: none;
+            margin-left: -106px;
+        ">
+              
+              <li><strong>To            <span class='centerleatype'>  :</span> </strong>{{To_email}}</li>
+              <li><strong>CC            <span class='centerfirst'>    :</span> </strong>{{CC_email}}</li>
+              <li><strong>Subject      <span class='centerlast'>      :</span> </strong>{{Subject}}</li>
+              <li><strong>Message      <span class='centerMessage'>      :</span> </strong>{{Message}}</li>
+            </ul>
+          </div>
+        </div>
+        
+        <a href="http://localhost:3000/user/Ticketview/{{ViewUserid}}" class="buttonlink">
+          <span style="color:#f0f5f5">&nbsp;&nbsp;&nbsp;&nbsp;Go to Tigma&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </a>
+     </div>
+    
+    <div class="media">
+      <div>
+        <p>Lacliff | No.11 | 1st Floor | VOC St | Ranga Colony</p>
+        <p>Sembakkam | Rajakilpakkam</p>
+        <p>Tamil Nadu 600073.</p>
+      </div>
+    </div>
+    
+  </body>
+</html>
