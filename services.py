@@ -57,13 +57,11 @@ def sso_login():
     conn = mysql.connect()
     cur = conn.cursor(pymysql.cursors.DictCursor)
     data = request.get_json()
-    print(data)
     email =  data['token']['email']
     str1 = f"""SELECT * FROM employee_data where email='{email}' and  Active_Status='true' ;"""
     cur.execute(str1)
     Ssologin = cur.fetchall()
     conn.commit()
-    print("permission granded",Ssologin)
     if len(Ssologin) != 0:
         return jsonify({'message': 'Login successful','data':Ssologin ,'status':200})
     else:
@@ -156,7 +154,7 @@ def user(id, page):
         cur.execute(str1)
         item = cur.fetchall()
         
-        PER_PAGE = 2
+        PER_PAGE = 5
         if page == 0:
             page = 1
         else:
@@ -291,12 +289,13 @@ def chart_user():
     cur = conn.cursor(pymysql.cursors.DictCursor)
     if request.method == 'POST':
         data = request.json
-       
-        str2="SELECT  date_format(date,'%m') as date, Month(date) as Month,( select count(*)  from daily_mainentry p where status='1' and month(date)=month) as Present,( select count(*)  from daily_mainentry a where status='2' and month(date)=month) as Absent,(select count(*)  from daily_mainentry o where status='2' and month(date)=month) as Off from daily_mainentry c  where date_format(date,'%Y')='2023' group by DATE_FORMAT(date,'%m')"
+        print("get data:",data)
+        str2="SELECT DATE_FORMAT(date, '%m') AS date, COUNT(CASE WHEN status = '1' THEN 1 END) AS Present, COUNT(CASE WHEN status = '2' THEN 1 END) AS Absent, COUNT(CASE WHEN status = '3' THEN 1 END) AS Off FROM emp_register.daily_mainentry WHERE DATE_FORMAT(date, '%Y') = '2024' GROUP BY DATE_FORMAT(date, '%m')ORDER BY date LIMIT 0, 1000"
+
         cur.execute(str2)
         item2 = cur.fetchall()
         conn.commit()
-       
+        print("item2",item2)
         days_in_months = (1,12)
         a=[]
         size=len(item2)
@@ -333,10 +332,15 @@ def chart_user():
                
     if len(item2) == 0 :                
         item2=a
-    
     # item2.sort(key=attrgetter('date'))
     
     item2 = sorted(item2, key=lambda x: x['date'])
+    for item in item2:
+       month_number = int(item['date'])
+       month_name = calendar.month_abbr[month_number]
+       item['date'] = month_name
+
+
     
     return jsonify({'data': item2})
 @app.route('/date_picker',methods=['POST'])
@@ -359,29 +363,34 @@ def datewise_picker():
         str_month= str(Month[0])
         str_year= str(Pass[0])
         int_month=int(str_month)
-        int_year=int(str_year)
         select_month=int_month+1
-        
+        print("get year or not",type(str_year))
+
+
         select_strmonth='0'+str(select_month)
         if(date_picker==''):
-            str3="SELECT a.id,a.userid,a.date,a.status,b.firstname,b.lastname ,Month(date) as Month,(select count(*)  from emp_register.daily_mainentry p where status='1' and  month(date)=month and p.userid=a.userid  ) as Present,( select count(*)  from emp_register.daily_mainentry v where status='2' and  month(date)=month and v.userid=a.userid) as Absent,(select count(*)  from emp_register.daily_mainentry o where status='3' and month(date)=month  and o.userid=a.userid) as Off from emp_register.daily_mainentry   as a left join emp_register.employee_data as b on a.userid = b.id where DATE_FORMAT(date,'%m')='"+select_strmonth+"' group by userid  "
+            str3="SELECT b.firstname,b.lastname,MONTH(a.date) AS Month,YEAR(a.date) AS Year,COUNT(CASE WHEN a.status = '1' THEN 1 END) AS Present,COUNT(CASE WHEN a.status = '2' THEN 1 END) AS Absent,COUNT(CASE WHEN a.status = '3' THEN 1 END) AS Off FROM emp_register.daily_mainentry AS a LEFT JOIN emp_register.employee_data AS b ON a.userid = b.id WHERE     YEAR(a.date) = '"+str_year+"' AND MONTH(a.date) = '"+select_strmonth+"' GROUP BY b.firstname,b.lastname,YEAR(a.date),MONTH(a.date)ORDER BY b.firstname,YEAR(a.date),MONTH(a.date)"
+           
+
         else:
             date_object = datetime.strptime(date_picker, '%Y-%m-%dT%H:%M:%S.%fZ')
             just_date = date_object.date()
             just_date_string = str(just_date)
             
             str3="SELECT a.id,a.userid,a.date,a.status,b.firstname,b.lastname ,Month(date) as Month,( select count(*)  from emp_register.daily_mainentry p where status='1' and p.date=a.date and p.userid=a.userid ) as Present,( select count(*)  from emp_register.daily_mainentry v where status='2' and v.date=a.date  and v.userid=a.userid) as Absent,(select count(*)  from emp_register.daily_mainentry o where status='3' and o.date=a.date and o.userid=a.userid) as Off from emp_register.daily_mainentry as a left join emp_register.employee_data as b on a.userid = b.id   where date='"+ just_date_string +"'  "
-        str4="SELECT a.id,a.userid,a.date,a.status,b.firstname,b.lastname ,Month(date) as Month,year(date) as year,( select count(*)  from emp_register.daily_mainentry p where status='1'  and p.userid=a.userid  ) as Present,( select count(*)  from emp_register.daily_mainentry v where status='2'  and v.userid=a.userid) as Absent,(select count(*)  from emp_register.daily_mainentry o where status='3'    and o.userid=a.userid) as Off from emp_register.daily_mainentry   as a left join emp_register.employee_data as b on a.userid = b.id group by userid"    
+        
         cur.execute(str3)
         item2 = cur.fetchall()
         conn.commit()
         days_in_months = (1,user_limit)
         a=[]
         size=len(item2)
-        
-    for month, num_days in enumerate(days_in_months, start=1):
-        x=[*range(num_days)]
-        if(month==2):
+    if(date_picker==''):
+          item2=item2
+    else:
+        for month, num_days in enumerate(days_in_months, start=1):
+         x=[*range(num_days)]
+         if(month==2):
             for day in x :
                 
                   if size != 0 :
@@ -409,7 +418,7 @@ def datewise_picker():
     # item2.sort(key=attrgetter('userid'))
  
     # item2 = sorted(item2, key=lambda x: x['userid'])
-    
+
     return jsonify({'data': item2})
 
 @app.route('/year_userwise',methods=['POST'])
@@ -418,7 +427,8 @@ def yearly_userwise():
     cur = conn.cursor(pymysql.cursors.DictCursor)
     if request.method == 'POST':
         data = request.json
-       
+        filter_year=data['year_pass']
+        str_filter_year= str(filter_year[0])
         str2="SELECT COUNT(DISTINCT(userid))as count FROM  emp_register.daily_mainentry"
         cur.execute(str2)
         item1 = cur.fetchall()
@@ -426,7 +436,7 @@ def yearly_userwise():
       
         user_limit = item1[0]['count']
        
-        str4="SELECT a.id,a.userid,a.date,a.status,b.firstname,b.lastname ,Month(date) as Month,year(date) as year,( select count(*)  from emp_register.daily_mainentry p where status='1'  and p.userid=a.userid  ) as Present,( select count(*)  from emp_register.daily_mainentry v where status='2'  and v.userid=a.userid) as Absent,(select count(*)  from emp_register.daily_mainentry o where status='3'    and o.userid=a.userid) as Off from emp_register.daily_mainentry   as a left join emp_register.employee_data as b on a.userid = b.id group by userid"    
+        str4="SELECT a.id,a.userid,a.date,a.status,b.firstname,b.lastname,MONTH(a.date) AS Month,YEAR(a.date) AS Year,(SELECT COUNT(*) FROM emp_register.daily_mainentry p WHERE p.status = '1' AND p.userid = a.userid) AS Present,(SELECT COUNT(*) FROM emp_register.daily_mainentry v WHERE v.status = '2' AND v.userid = a.userid) AS Absent,(SELECT COUNT(*) FROM emp_register.daily_mainentry o WHERE o.status = '3' AND o.userid = a.userid) AS Off FROM emp_register.daily_mainentry AS a LEFT JOIN  emp_register.employee_data AS b ON a.userid = b.id WHERE YEAR(a.date) = '"+str_filter_year+"' GROUP BY a.id, a.userid, a.date, a.status, b.firstname, b.lastname, Month, Year"    
         cur.execute(str4)
         item2 = cur.fetchall()
         conn.commit()
@@ -482,17 +492,15 @@ def month():
     cur = conn.cursor(pymysql.cursors.DictCursor)
     if request.method == 'POST':
         data = request.json
-       
         User = data['User']
         Month=data['Month']
         Pass=data['year_pass']
-       
+        print("pass year printed",Pass)
         str_user= str(User[0])
         str_month= str(Month[0])
         str_year= str(Pass[0])
         int_month=int(str_month)
         int_user=int(str_user)
-        int_year=int(str_year)
         select_month=int_month+1
         select_strmonth='0'+str(select_month)
         select_user=int_user
@@ -502,13 +510,13 @@ def month():
         if(employee=='0'):
             str1 = "SELECT  DATE_FORMAT(date,'%d') AS date,(select count(*) from  daily_mainentry p where status='1' and p.date=c.date )as Present,(select count(*)  from daily_mainentry a where status='2' and a.date=c.date ) as Absent,(select count(*)  from daily_mainentry o where status='3' and o.date=c.date  ) as Off  from daily_mainentry c  where date_format(date,'%m')='"+select_strmonth+"' and date_format(date,'%Y')='"+year_of_select+"'  group by date"
         else:
-            str1= "SELECT  DATE_FORMAT(date,'%d') AS date,userid,(select count(*) from  daily_mainentry p where status='1' and p.date=c.date and p.userid=c.userid )as Present,(select count(*)  from daily_mainentry a where status='2' and a.date=c.date and a.userid=c.userid) as Absent,(select count(*)  from daily_mainentry o where status='3' and o.date=c.date and o.userid=c.userid) as Off  from daily_mainentry c  where date_format(date,'%m')='"+select_strmonth+"' and date_format(date,'%Y')='"+year_of_select+"' and userid='"+employee+"'  group by date"
+            str1= "SELECT  DATE_FORMAT(date,'%d') AS date,userid,(select count(*) from  daily_mainentry p where status='1' and p.date=c.date and p.userid=c.userid )as Present,(select count(*)  from daily_mainentry a where status='2' and a.date=c.date and a.userid=c.userid) as Absent,(select count(*)  from daily_mainentry o where status='3' and o.date=c.date and o.userid=c.userid) as Off  from daily_mainentry c  where date_format(date,'%m')='"+select_strmonth+"' and date_format(date,'%Y')='"+str_year+"' and userid='"+employee+"'  group by date"
     
     cur.execute(str1)
     item2 = cur.fetchall()
     conn.commit()
     after_add= select_month
-    year1=int_year
+    year1=2024
     days_in_months = calendar.monthrange(year1,after_add)[1]
     a=[]
     size=len(item2)
@@ -536,23 +544,25 @@ def barchart():
         User = data['popup_date']
         Month=data['Month']
         Pass=data['year_pass']
-      
-        str_user= str(User[0])
+
+
+        str_user= str(User)
         str_month= str(Month[0])
         str_year= str(Pass[0])
         int_month=int(str_month)
         int_user=int(str_user)
-        int_year=int(str_year)
         select_month=int_month+1
         select_strmonth='0'+str(select_month)
         select_user=int_user
         employee=str(select_user)
         
         year_of_select=str(str_year)
-        str1="SELECT a.id,a.userid,a.status,b.firstname,b.lastname ,Month(date) as Month from daily_mainentry   as a left join employee_data as b on a.userid = b.id where date_format(date,'%m')='"+select_strmonth+"' and date_format(date,'%d')='"+str(User)+"'  "
+        str1="SELECT a.id,a.userid,a.status,b.firstname,b.lastname ,Month(date) as Month from daily_mainentry   as a left join employee_data as b on a.userid = b.id where date_format(date,'%m')='"+select_strmonth+"' and date_format(date,'%d')='"+str_user+"' and date_format(date,'%Y')='"+str_year+"'"
         cur.execute(str1)
+
         item2 = cur.fetchall()
         conn.commit()
+
         newdict={}
         pre=[]
         absents=[]
@@ -1118,7 +1128,6 @@ def Summary_All():
         cur.execute(str1)
         item2 = cur.fetchall()
         conn.commit()
-
         month_number = datetime.strptime(str_month, "%B").month
 
         after_add= month_number
@@ -2651,7 +2660,6 @@ def ticketChat(empid):
 def chatTicket_list(empid,limit):
     conn = mysql.connect()
     cur = conn.cursor(pymysql.cursors.DictCursor)
-    print(limit)
 
     str1 = (f"""SELECT a.id, MAX(a.user_id) AS user_id, MAX(a.To_Email) AS To_Email,MAX(a.Subject) AS Subject,MAX(a.Message) AS Message,MAX(a.status) AS status,MAX(b.id) AS id,MAX(b.ticketid) AS ticketid,MAX(b.userid) AS userid,MAX(b.CC_Emails) AS CC_Emails,MAX(c.firstname) AS firstname,MAX(c.lastname) AS lastname
     FROM emp_register.ticketrise_table AS a
@@ -2662,7 +2670,6 @@ def chatTicket_list(empid,limit):
     cur.execute(str1)
     listingData = cur.fetchall()
     conn.commit()
-    print(listingData)
      
     return jsonify({'data':listingData})
 @app.route('/Chating_employeelist',methods=['GET'])
@@ -2673,7 +2680,6 @@ def Chating_employeelist():
     cur.execute(str1)
     listingEmp = cur.fetchall()
     conn.commit()
-    print(listingEmp)
      
     return jsonify({'data':listingEmp})
 
